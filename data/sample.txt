@@ -1,0 +1,3 @@
+This is a sample text file for the language model training. You can add more text files to this directory to improve the training dataset.
+The model will learn from all text files in this directory along with the WikiText-2 dataset.
+Feel free to add domain-specific text files here to fine-tune the model for your use case.
