@@ -1,10 +1,10 @@
 🗣️ lute: A Small Language Model Framework (Version 0)
 
-Welcome to lute-slm, a project dedicated to building and understanding Small Language Models (SLMs) from the ground up using PyTorch. This framework is currently in Version 0, which serves as a robust Proof-of-Concept for the core Transformer architecture and the training pipeline.
+Welcome to lute, a project dedicated to building and understanding Small Language Models (SLMs) from the ground up using PyTorch. This framework is currently in Version 0, which serves as a robust Proof-of-Concept for the core Transformer architecture and the training pipeline.
 
 🌟 Project Description (Version 0)
 
-lute-slm V0 implements a foundational decoder-only Transformer model, inspired by modern architectures like Qwen and Llama. It uses key techniques such as Multi-Head Attention, RMS Normalization, and the SiLU activation function.
+lute V0 implements a foundational decoder-only Transformer model, inspired by modern architectures like Qwen and Llama. It uses key techniques such as Multi-Head Attention, RMS Normalization, and the SiLU activation function.
 
 The primary goal of Version 0 is to provide a clear, readable, and functional foundation for:
 
@@ -18,12 +18,12 @@ Inference: Enabling basic text generation (sampling).
 
 🛠️ Installation and Dependencies
 
-To run lute-slm, you will need Python 3.8+ and the libraries listed in requirements.txt.
+To run lute, you will need Python 3.8+ and the libraries listed in requirements.txt.
 
 1. Clone the Repository
 
 git clone [https://github.com/your-username/lute.git](https://github.com/Joseph-Ambakederimo/lute.git)
-cd lute-slm
+cd lute
 
 
 2. Install Dependencies
@@ -33,7 +33,7 @@ pip install -r requirements.txt
 
 3. Prepare Your Training Data
 
-Place your raw text files (e.g., .txt files containing books, articles, or other text data) inside the data/local_texts/ directory.
+Place your raw text files (e.g., .txt files containing books, articles, or other text data) inside the data/ directory.
 
 🚀 Usage Guide
 
@@ -53,7 +53,7 @@ Run the tokenizer training script:
 python tokenizer.py
 
 
-This script will read all files in ../data/local_texts, train the tokenizer, and save the resulting files (vocab.json and merges.txt) in the current directory.
+This script will read all files in ../data/, train the tokenizer, and save the resulting files (vocab.json and merges.txt) in the current directory.
 
 Return to the root directory:
 
@@ -138,10 +138,10 @@ Open a Pull Request against the main branch, explaining your changes and the pro
 
 The project is modularized for clarity and maintainability:
 
-lute-slm/
+lute/
 │
 ├── data/                       # Training data and saved model checkpoints
-│   ├── local_texts/            # Your raw .txt files go here
+│ # Your raw .txt files go here
 │   └── checkpoints/            # Saved model weights (.pt files)
 │
 ├── model/                      # Core Transformer architecture definition
