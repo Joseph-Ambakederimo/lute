@@ -12,7 +12,7 @@ import os
 config = ModelConfig(vocab_size=50000) 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-print(f"🚀 Starting SLM Training on device: {device}")
+print(f"🚀 Starting Lute Training on device: {device}")
 print(f"Model Size: {config.n_layers} layers, {config.d_model} embed dim")
 print(f"Effective Batch Size: {config.batch_size * config.gradient_accumulation_steps}")
 

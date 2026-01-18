@@ -13,17 +13,17 @@ LOCAL_DIR = os.path.join(PROJECT_ROOT, "data")
 
 class TextDataset(Dataset):
     def __init__(self, tokenizer_path=TOKENIZER_PATH, seq_len=512, num_docs=20000):
-        print("🔤 loading tokenizer...")
+        print("loading tokenizer...")
         self.tokenizer = ByteLevelBPETokenizer(
             os.path.join(tokenizer_path, "vocab.json"),
             os.path.join(tokenizer_path, "merges.txt")
         )
 
-        print("📚 loading local + wikitext2 data...")
+        print("loading local + wikitext2 data...")
         self.texts = self._load_texts(num_docs)
         print(f"loaded {len(self.texts)} documents")
 
-        print("🧩 tokenizing and chunking...")
+        print("tokenizing and chunking...")
         self.tokens = self._tokenize_and_chunk(seq_len)
         print(f"created {len(self.tokens)} training chunks (sequences of length {seq_len})")
 
@@ -46,17 +46,31 @@ class TextDataset(Dataset):
         return texts
 
     def _tokenize_and_chunk(self, seq_len):
-        """Encodes all texts and splits the resulting stream into fixed-length chunks."""
-        all_tokens = []
+        """Encodes all texts, flattens them, and splits into fixed-length chunks."""
+        # 1. Tokenize all texts deeply
+        all_token_ids = []
+        print(f"Tokenizing {len(self.texts)} documents...")
         for text in tqdm(self.texts, desc="tokenizing"):
-            # Encode text to list of token IDs
+            # Encode text to list of token IDs (no truncation related to seq_len here)
             ids = self.tokenizer.encode(text).ids
-            
-            # Slide a window of size seq_len across the token IDs
-            for i in range(0, len(ids) - seq_len, seq_len):
-                chunk = ids[i : i + seq_len]
-                all_tokens.append(torch.tensor(chunk, dtype=torch.long))
-        return all_tokens
+            # Optional: Add EOS token between documents if desired. 
+            # For now, we'll just concatenate them directly (typical for pretraining)
+            # or you might want to add a specialized separator.
+            all_token_ids.extend(ids)
+            # If your model expects end-of-text tokens, append them here:
+            # all_token_ids.append(self.tokenizer.token_to_id("</s>"))
+
+        print(f"Total tokens: {len(all_token_ids)}")
+
+        # 2. Chunk the flat list
+        chunks = []
+        # We drop the last partial chunk if it's smaller than seq_len
+        # to ensure all batches are the same shape.
+        for i in range(0, len(all_token_ids) - seq_len + 1, seq_len):
+            chunk = all_token_ids[i : i + seq_len]
+            chunks.append(torch.tensor(chunk, dtype=torch.long))
+        
+        return chunks
 
     def __len__(self):
         return len(self.tokens)

@@ -38,7 +38,7 @@ class ModelConfig:
     rms_norm_eps: float = 1e-6     # Epsilon for RMSNorm
 
     # Training Parameters
-    batch_size: int = 5            # Physical batch size (reduced for CPU)
+    batch_size: int = 3            # Physical batch size (reduced for CPU)
     gradient_accumulation_steps: int = 1 # Effective batch size = batch_size * this value
     muon_lr: float = 3e-4          # Learning Rate for Optimizer
     #  max_steps: int = 10000 

@@ -33,7 +33,7 @@ def prepare_corpus():
     wiki_train = [x["text"] for x in wiki if len(x["text"]) > 0]
 
     # 3. Write combined corpus
-    combined_path = "./corpus.txt"
+    combined_path = "./data/corpus.txt"
     with open(combined_path, "w", encoding="utf-8") as f:
         for file_path in local_files:
             with open(file_path, "r", encoding="utf-8") as src:
@@ -57,17 +57,17 @@ def train_tokenizer(corpus_path):
     )
     # The tokenizer saves vocab.json and merges.txt inside the SAVE_PATH
     tokenizer.save_model(SAVE_PATH)
-    print(f"✅ tokenizer saved to {SAVE_PATH}")
+    print(f"tokenizer saved to {SAVE_PATH}")
 
 def load_checkpoint(model, optimizer, scaler, path, device):
     """Load model, optimizer, and scaler state from a checkpoint."""
     if os.path.exists(path):
-        checkpoint = torch.load(path, map_location=device)
+        checkpoint = torch.load(path, map_location=device, weights_only=True)
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         scaler.load_state_dict(checkpoint['scaler_state_dict'])
         start_step = checkpoint.get('step', 0)
-        print(f"✅ Checkpoint loaded from {path}, resuming from step {start_step}")
+        print(f"Checkpoint loaded from {path}, resuming from step {start_step}")
         return start_step
     return 0
 
@@ -97,9 +97,22 @@ def train(model, config, checkpoint_dir="./checkpoints"):
     dataloader = DataLoader(dataset, batch_size=config.batch_size, shuffle=True)
     
     # Optimizer and Scaler
+    # Optimizer and Scaler
     from torch.optim import AdamW
     optimizer = AdamW(model.parameters(), lr=config.muon_lr)
-    scaler = torch.cuda.amp.GradScaler(enabled=config.use_amp)
+    
+    # Handle Scaler (Dummy if not using AMP to avoid CPU crashes with cuda scaler)
+    class DummyScaler:
+        def scale(self, loss): return loss
+        def step(self, optimizer): optimizer.step()
+        def update(self): pass
+        def state_dict(self): return {}
+        def load_state_dict(self, state_dict): pass
+
+    if config.use_amp and torch.cuda.is_available():
+        scaler = torch.cuda.amp.GradScaler(enabled=True)
+    else:
+        scaler = DummyScaler()
     
     # Loss function
     loss_fn = nn.CrossEntropyLoss()
@@ -108,10 +121,10 @@ def train(model, config, checkpoint_dir="./checkpoints"):
     model.train()
     step = 0
     
-    print(f"🚀 Starting training for {config.max_steps} steps on {device}")
+    print(f"Starting training for {config.max_steps} steps on {device}")
     
     with tqdm(total=config.max_steps, desc="Training") as pbar:
-        for epoch in range(100):  # Large number of epochs, we'll break on max_steps
+        while step < config.max_steps:  # Loop indefinitely until max_steps is reached
             for batch_idx, (x, y) in enumerate(dataloader):
                 if step >= config.max_steps:
                     break
@@ -175,7 +188,7 @@ def evaluate(model, seq_len=512, num_docs=200, device="cpu"):
     
     print("📊 Loading evaluation dataset...")
     dataset = TextDataset(seq_len=seq_len, num_docs=num_docs)
-    dataloader = DataLoader(dataset, batch_size=8, shuffle=False)
+    dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
     
     loss_fn = nn.CrossEntropyLoss()
     total_loss = 0
@@ -202,7 +215,7 @@ def evaluate(model, seq_len=512, num_docs=200, device="cpu"):
 
 if __name__ == "__main__":
     # Ensure the data directory exists for the combined corpus file
-    os.makedirs(".data", exist_ok=True)
+    os.makedirs("../data", exist_ok=True)
     # You must manually ensure ../data/local_texts contains some .txt files or create it.
     corpus = prepare_corpus()
     train_tokenizer(corpus)

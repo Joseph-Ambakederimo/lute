@@ -27,7 +27,7 @@ def prepare_corpus():
     wiki_train = [x["text"] for x in wiki if len(x["text"]) > 0]
 
     # 3. Write combined corpus
-    combined_path = "./corpus.txt"
+    combined_path = "./data/corpus.txt"
     with open(combined_path, "w", encoding="utf-8") as f:
         for file_path in local_files:
             with open(file_path, "r", encoding="utf-8") as src:
@@ -51,11 +51,11 @@ def train_tokenizer(corpus_path):
     )
     # The tokenizer saves vocab.json and merges.txt inside the SAVE_PATH
     tokenizer.save_model(SAVE_PATH)
-    print(f"✅ tokenizer saved to {SAVE_PATH}")
+    print(f"tokenizer saved to {SAVE_PATH}")
 
 if __name__ == "__main__":
     # Ensure the data directory exists for the combined corpus file
-    os.makedirs("./data", exist_ok=True)
+    os.makedirs("../data", exist_ok=True)
     # You must manually ensure ../data/local_texts contains some .txt files or create it.
     corpus = prepare_corpus()
     train_tokenizer(corpus)
